@@ -1,20 +1,31 @@
-import express from 'express'
+import express from 'express';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import serverless from 'serverless-http';
+
 const app = express();
-app.use(express.json())
-app.set('view engine', 'ejs')
+app.use(express.json());
 
+// ✅ ES6 __dirname fix
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
-app.listen(5000, () => {
-    console.log('server runing on port 5000');
-})
+// ✅ EJS view engine setup
+app.set('view engine', 'ejs');
+app.set('views', path.join(__dirname, 'views')); // no '..' needed now
 
-// Table of 2
+// ✅ Route
 app.get('/', (req, res) => {
-    let number = parseInt(req.query.number)  ||  2
-    let length = parseInt(req.query.length)  ||  10
-    let tablePrepare = []
-    for (let i = 1; i <= length; i++) {
-        tablePrepare.push(`${number} X ${i} = ${number * i}`);
-    }
-    res.render('table', { tablePrepare })
-})
+  const number = parseInt(req.query.number) || 2;
+  const length = parseInt(req.query.length) || 10;
+
+  const tablePrepare = [];
+  for (let i = 1; i <= length; i++) {
+    tablePrepare.push(`${number} X ${i} = ${number * i}`);
+  }
+
+  res.render('table', { tablePrepare });
+});
+
+// ✅ Do NOT use app.listen() on Vercel
+export const handler = serverless(app);
