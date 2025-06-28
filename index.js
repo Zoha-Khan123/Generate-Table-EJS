@@ -1,31 +1,23 @@
-import express from 'express';
-import path from 'path';
-import { fileURLToPath } from 'url';
-import serverless from 'serverless-http';
+import express from "express";
+import path from "path";
+import { fileURLToPath } from "url";
+import { tableRouter } from "./routes/tableRouter.js";
 
 const app = express();
-app.use(express.json());
 
-// ✅ ES6 __dirname fix
+// ✅ Fix for __dirname in ES Modules
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// ✅ EJS view engine setup
-app.set('view engine', 'ejs');
-app.set('views', path.join(__dirname, 'views')); // no '..' needed now
+// ✅ EJS Setup
+app.set("view engine", "ejs");
+app.set("views", path.join(__dirname, "views"));
 
-// ✅ Route
-app.get('/', (req, res) => {
-  const number = parseInt(req.query.number) || 2;
-  const length = parseInt(req.query.length) || 10;
+// ✅ Middleware
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
-  const tablePrepare = [];
-  for (let i = 1; i <= length; i++) {
-    tablePrepare.push(`${number} X ${i} = ${number * i}`);
-  }
+// ✅ Routes
+app.use("/", tableRouter);
 
-  res.render('table', { tablePrepare });
-});
-
-// ✅ Do NOT use app.listen() on Vercel
-export const handler = serverless(app);
+export default app;
